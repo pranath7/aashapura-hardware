@@ -340,58 +340,68 @@ export default function AdminPortal() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-white flex flex-col md:flex-row font-sans">
       
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 bg-[#1B1A18] border-b md:border-b-0 md:border-r border-[#4A4845] p-6 flex flex-col justify-between flex-shrink-0 space-y-8">
-        <div className="space-y-8">
+      {/* Sidebar Navigation (Desktop) / Sticky Header (Mobile) */}
+      <div className="w-full md:w-64 bg-[#1B1A18] border-b md:border-b-0 md:border-r border-[#4A4845] p-4 md:p-6 flex flex-col justify-between flex-shrink-0 space-y-4 md:space-y-8 md:sticky md:top-0 md:h-screen z-10">
+        <div className="space-y-3 md:space-y-8">
           {/* Header */}
-          <div className="flex items-center gap-3">
-            <img 
-              src="/images/logo_white.png" 
-              alt="Aashapura Hardware Logo" 
-              className="h-10 w-auto object-contain" 
-            />
-            <span className="text-[10px] font-mono bg-black/60 px-2 py-0.5 border border-[#B8723C]/20 text-[#D98E4A] uppercase tracking-wider rounded">
-              CONSOLE
-            </span>
+          <div className="flex items-center justify-between md:justify-start gap-3">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/images/logo_white.png" 
+                alt="Aashapura Hardware Logo" 
+                className="h-8 md:h-10 w-auto object-contain" 
+              />
+              <span className="text-[9px] md:text-[10px] font-mono bg-black/60 px-2 py-0.5 border border-[#B8723C]/20 text-[#D98E4A] uppercase tracking-wider rounded">
+                CONSOLE
+              </span>
+            </div>
+            
+            {/* Mobile Exit Link */}
+            <a 
+              href="#" 
+              className="md:hidden text-[10px] font-mono font-bold text-[#D98E4A] hover:underline uppercase flex items-center gap-1 bg-[#2A2927]/60 px-3 py-1.5 border border-slate-700/40 rounded-lg"
+            >
+              Exit <LogOut className="w-3 h-3" />
+            </a>
           </div>
 
-          {/* Nav Items */}
-          <div className="space-y-1">
+          {/* Nav Items (Flex row on mobile, flex col on desktop) */}
+          <div className="flex flex-row md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0 scrollbar-none border-t border-[#4A4845]/40 md:border-t-0 pt-3 md:pt-0">
             <button
               onClick={() => setActiveTab('list')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 py-2 px-3 md:py-2.5 md:px-4 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                 activeTab === 'list'
                   ? 'bg-white text-black'
                   : 'text-slate-400 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Database className="w-4 h-4" /> Product Inventory
+              <Database className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span>Inventory</span>
             </button>
             <button
               onClick={triggerAddProduct}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 py-2 px-3 md:py-2.5 md:px-4 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                 activeTab === 'edit' && !editingProduct
                   ? 'bg-white text-black'
                   : 'text-slate-400 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Plus className="w-4 h-4" /> Add Product
+              <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span>Add Product</span>
             </button>
             <button
               onClick={() => setActiveTab('categories')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 py-2 px-3 md:py-2.5 md:px-4 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                 activeTab === 'categories'
                   ? 'bg-white text-black'
                   : 'text-slate-400 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <FolderPlus className="w-4 h-4" /> Category Registry
+              <FolderPlus className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span>Categories</span>
             </button>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="space-y-3 pt-6 border-t border-slate-800">
+        {/* Footer Actions (Hidden on mobile to save vertical height) */}
+        <div className="space-y-3 pt-6 border-t border-slate-800 hidden md:block">
           <button
             onClick={handleResetDB}
             className="w-full py-2 bg-red-950/20 hover:bg-red-950/60 border border-red-500/20 text-red-400 text-[10px] font-mono uppercase tracking-wider rounded-lg transition-all"
@@ -452,37 +462,37 @@ export default function AdminPortal() {
                 <table className="w-full border-collapse text-left">
                   <thead>
                     <tr className="bg-[#1B1A18] border-b border-[#4A4845] text-[10px] font-mono text-slate-400 uppercase tracking-widest">
-                      <th className="p-4">Image</th>
-                      <th className="p-4">Product Name</th>
-                      <th className="p-4">Category</th>
-                      <th className="p-4 text-right">Actions</th>
+                      <th className="p-3 sm:p-4">Image</th>
+                      <th className="p-3 sm:p-4">Product Name</th>
+                      <th className="p-3 sm:p-4 hidden sm:table-cell">Category</th>
+                      <th className="p-3 sm:p-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/80 text-xs">
                     {filteredProducts.map((p) => (
                       <tr key={p.id} className="hover:bg-slate-900/40 transition-colors">
-                        <td className="p-4">
+                        <td className="p-3 sm:p-4">
                           <img 
                             src={p.img} 
                             alt={p.name} 
                             className="h-10 w-10 object-cover rounded-lg border border-slate-800" 
                           />
                         </td>
-                        <td className="p-4 font-bold text-white max-w-xs truncate">{p.name}</td>
-                        <td className="p-4 text-slate-400 uppercase tracking-wider font-mono">
+                        <td className="p-3 sm:p-4 font-bold text-white max-w-[140px] sm:max-w-xs truncate">{p.name}</td>
+                        <td className="p-3 sm:p-4 text-slate-400 uppercase tracking-wider font-mono hidden sm:table-cell">
                           {categories.find(c => c.id === p.category)?.shortName || p.category}
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="p-3 sm:p-4 text-right space-x-1 sm:space-x-2 whitespace-nowrap">
                           <button
                             onClick={() => triggerEditProduct(p)}
-                            className="p-2 bg-slate-800 hover:bg-[#B8723C] text-slate-300 hover:text-black rounded-lg transition-all"
+                            className="p-1.5 sm:p-2 bg-slate-800 hover:bg-[#B8723C] text-slate-300 hover:text-black rounded-lg transition-all"
                             title="Edit Product"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(p.id)}
-                            className="p-2 bg-slate-850 hover:bg-red-600 text-slate-300 hover:text-white rounded-lg transition-all"
+                            className="p-1.5 sm:p-2 bg-slate-850 hover:bg-red-600 text-slate-350 hover:text-white rounded-lg transition-all"
                             title="Delete Product"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -696,11 +706,11 @@ export default function AdminPortal() {
                   <table className="w-full border-collapse text-left">
                     <thead>
                       <tr className="bg-[#1B1A18] border-b border-[#4A4845] text-[10px] font-mono text-slate-400 uppercase tracking-widest">
-                        <th className="p-4">Icon</th>
-                        <th className="p-4">Name</th>
-                        <th className="p-4">Short Name</th>
-                        <th className="p-4">Models</th>
-                        <th className="p-4 text-right">Action</th>
+                        <th className="p-3 sm:p-4">Icon</th>
+                        <th className="p-3 sm:p-4">Name</th>
+                        <th className="p-3 sm:p-4 hidden sm:table-cell">Short Name</th>
+                        <th className="p-3 sm:p-4">Models</th>
+                        <th className="p-3 sm:p-4 text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800 text-xs">
@@ -708,14 +718,14 @@ export default function AdminPortal() {
                         const modelCount = products.filter(p => p.category === cat.id).length;
                         return (
                           <tr key={cat.id} className="hover:bg-slate-900/40 transition-colors">
-                            <td className="p-4 text-lg">{cat.emoji}</td>
-                            <td className="p-4 font-bold text-white">{cat.name}</td>
-                            <td className="p-4 text-slate-400 font-mono">{cat.shortName}</td>
-                            <td className="p-4 font-mono font-bold text-[#D98E4A]">{modelCount}</td>
-                            <td className="p-4 text-right">
+                            <td className="p-3 sm:p-4 text-lg">{cat.emoji}</td>
+                            <td className="p-3 sm:p-4 font-bold text-white max-w-[100px] sm:max-w-none truncate">{cat.name}</td>
+                            <td className="p-3 sm:p-4 text-slate-400 font-mono hidden sm:table-cell">{cat.shortName}</td>
+                            <td className="p-3 sm:p-4 font-mono font-bold text-[#D98E4A]">{modelCount}</td>
+                            <td className="p-3 sm:p-4 text-right">
                               <button
                                 onClick={() => handleDeleteCategory(cat.id)}
-                                className="p-2 bg-slate-850 hover:bg-red-600 text-slate-350 hover:text-white rounded-lg transition-all"
+                                className="p-1.5 sm:p-2 bg-slate-850 hover:bg-red-600 text-slate-350 hover:text-white rounded-lg transition-all"
                                 title="Delete Category"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
