@@ -23,17 +23,6 @@ export default function Categories() {
     return () => window.removeEventListener('ah_db_update', handleUpdate);
   }, []);
 
-  // Helper metadata details for the hexagons (blends visual aesthetics)
-  const categoryMeta = {
-    'kitchen-accessories': { stamp: 'RANGE 01', img: '/images/kitchen_fittings.png', desc: 'Premium soft-close tandem drawer systems and wire baskets.' },
-    'pvd-profile': { stamp: 'RANGE 02', img: '/images/glass_fittings.png', desc: 'Decorative luxury gold T-profiles, U-trims, and border channels.' },
-    'wardrobe-accessories': { stamp: 'RANGE 03', img: '/images/doors_plywood.png', desc: 'Smart wardrobe pull-out shoe racks, hangers, and slides.' },
-    'sliding-fitting': { stamp: 'RANGE 04', img: '/images/doors_plywood.png', desc: 'Heavy-duty wardrobe door rollers and guide rails.' },
-    'door-closer': { stamp: 'RANGE 05', img: '/images/door_handles.png', desc: 'Hydraulic door closers, concealed dampers, and pivots.' },
-    'hinges': { stamp: 'RANGE 06', img: '/images/door_handles.png', desc: 'SS304 butt hinges, soft-close cabinet hinges, and door stops.' },
-    'telescopic-channel': { stamp: 'RANGE 07', img: '/images/kitchen_fittings.png', desc: 'Heavy-duty ball bearing slides and push-to-open rails.' },
-  };
-
   return (
     <section id="categories" className="py-16 sm:py-24 border-b border-[#1B1A18] text-left max-w-7xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-12 bg-[#0E0E0F]">
       <motion.div 
@@ -57,7 +46,11 @@ export default function Categories() {
       {/* Hexagonal Bento Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {categoriesList.map((cat, idx) => {
-          const meta = categoryMeta[cat.id] || { stamp: 'RANGE 00', img: '/images/door_handles.png', desc: 'Architectural hardware fittings.' };
+          const meta = {
+            stamp: cat.stamp || 'RANGE 00',
+            img: cat.img || '/images/door_handles.png',
+            desc: cat.desc || 'Architectural hardware fittings.'
+          };
           const count = productsList.filter(p => p.category === cat.id).length;
 
           return (

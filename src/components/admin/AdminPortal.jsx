@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Settings, Plus, Trash2, Edit2, LogOut, Database, UploadCloud, Check, AlertCircle, X, Search, FolderPlus, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getProducts, getCategories, addProduct, updateProduct, deleteProduct, resetDB, addCategory, deleteCategory } from '../../utils/db';
+import { getProducts, getCategories, addProduct, updateProduct, deleteProduct, resetDB, addCategory, deleteCategory, updateCategory } from '../../utils/db';
 
 export default function AdminPortal() {
   const [passcode, setPasscode] = useState('');
@@ -23,9 +23,13 @@ export default function AdminPortal() {
   const [formImg, setFormImg] = useState('');
 
   // Category Form State
+  const [editingCategory, setEditingCategory] = useState(null);
   const [newCatName, setNewCatName] = useState('');
   const [newCatShortName, setNewCatShortName] = useState('');
   const [newCatEmoji, setNewCatEmoji] = useState('⚙️');
+  const [newCatImg, setNewCatImg] = useState('');
+  const [newCatDesc, setNewCatDesc] = useState('');
+  const [newCatStamp, setNewCatStamp] = useState('');
   
   // Storage Providers Configuration
   const [cloudName, setCloudName] = useState('');
@@ -133,7 +137,11 @@ export default function AdminPortal() {
         if (resData.success && resData.data) {
           // Select optimized image version (medium/compressed) to load extremely quick on main store catalog
           const optimizedUrl = resData.data.medium?.url || resData.data.display_url || resData.data.url;
-          setFormImg(optimizedUrl);
+          if (activeTab === 'categories') {
+            setNewCatImg(optimizedUrl);
+          } else {
+            setFormImg(optimizedUrl);
+          }
           setUploadSuccess(true);
           triggerNotification('Image Uploaded & Web-Optimized!');
         } else {
@@ -172,7 +180,11 @@ export default function AdminPortal() {
         }
 
         const data = await response.json();
-        setFormImg(data.secure_url);
+        if (activeTab === 'categories') {
+          setNewCatImg(data.secure_url);
+        } else {
+          setFormImg(data.secure_url);
+        }
         setUploadSuccess(true);
         triggerNotification('Image Uploaded to Cloudinary!');
       } catch (err) {
@@ -241,7 +253,7 @@ export default function AdminPortal() {
     }
   };
 
-  // Add Dynamic Category Form Submit
+  // Add/Edit Dynamic Category Form Submit
   const handleCategorySubmit = (e) => {
     e.preventDefault();
     if (!newCatName || !newCatShortName) {
@@ -249,16 +261,46 @@ export default function AdminPortal() {
       return;
     }
 
-    addCategory({
+    const payload = {
       name: newCatName,
       shortName: newCatShortName,
       emoji: newCatEmoji,
-    });
+      img: newCatImg,
+      desc: newCatDesc,
+      stamp: newCatStamp
+    };
+
+    if (editingCategory) {
+      updateCategory({
+        ...payload,
+        id: editingCategory.id
+      });
+      setEditingCategory(null);
+      triggerNotification('Category Updated Successfully!');
+    } else {
+      addCategory(payload);
+      triggerNotification('New Category Created Successfully!');
+    }
 
     setNewCatName('');
     setNewCatShortName('');
     setNewCatEmoji('⚙️');
-    triggerNotification('New Category Created Successfully!');
+    setNewCatImg('');
+    setNewCatDesc('');
+    setNewCatStamp('');
+    setUploadSuccess(false);
+  };
+
+  const handleCategoryEdit = (cat) => {
+    setEditingCategory(cat);
+    setNewCatName(cat.name);
+    setNewCatShortName(cat.shortName);
+    setNewCatEmoji(cat.emoji);
+    setNewCatImg(cat.img || '');
+    setNewCatDesc(cat.desc || '');
+    setNewCatStamp(cat.stamp || '');
+    setUploadSuccess(false);
+    setUploadError('');
   };
 
   // Delete Category (cascade clean)
@@ -648,9 +690,11 @@ export default function AdminPortal() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Form: Add Category */}
+              {/* Left Form: Add/Edit Category */}
               <div className="lg:col-span-5 bg-[#1B1A18] p-6 border border-[#4A4845] rounded-2xl space-y-4">
-                <h3 className="font-display font-black text-xl text-[#F5F2ED] uppercase tracking-wider">CREATE CATEGORY</h3>
+                <h3 className="font-display font-black text-xl text-[#F5F2ED] uppercase tracking-wider">
+                  {editingCategory ? 'EDIT CATEGORY' : 'CREATE CATEGORY'}
+                </h3>
                 <form onSubmit={handleCategorySubmit} className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Category Name</label>
@@ -676,24 +720,92 @@ export default function AdminPortal() {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Category Emoji Icon</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. 💎 or 📐" 
-                      value={newCatEmoji}
-                      onChange={(e) => setNewCatEmoji(e.target.value)}
-                      required 
-                      className="w-full p-3 bg-[#0E0E0F] border border-[#4A4845] text-white text-xs focus:border-[#B8723C] outline-none rounded-xl text-center text-lg" 
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Emoji Icon</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. 📐" 
+                        value={newCatEmoji}
+                        onChange={(e) => setNewCatEmoji(e.target.value)}
+                        required 
+                        className="w-full p-3 bg-[#0E0E0F] border border-[#4A4845] text-white text-xs focus:border-[#B8723C] outline-none rounded-xl text-center text-lg" 
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Range Stamp</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. RANGE 01" 
+                        value={newCatStamp}
+                        onChange={(e) => setNewCatStamp(e.target.value)}
+                        className="w-full p-3 bg-[#0E0E0F] border border-[#4A4845] text-white text-xs focus:border-[#B8723C] outline-none rounded-xl font-mono uppercase" 
+                      />
+                    </div>
                   </div>
 
-                  <button 
-                    type="submit" 
-                    className="w-full py-3 bg-[#B8723C] hover:bg-[#D98E4A] text-black font-display font-black text-xs sm:text-sm uppercase tracking-wider transition-all rounded-xl shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" /> Create Category
-                  </button>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Category Description</label>
+                    <textarea 
+                      placeholder="Enter a brief summary of this product range..." 
+                      rows="2"
+                      value={newCatDesc}
+                      onChange={(e) => setNewCatDesc(e.target.value)}
+                      className="w-full p-3 bg-[#0E0E0F] border border-[#4A4845] text-white text-xs focus:border-[#B8723C] outline-none rounded-xl"
+                    ></textarea>
+                  </div>
+
+                  {/* Category Image Uploader */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">Category Cover Image</label>
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <input 
+                          type="text" 
+                          placeholder="Image URL (e.g. /images/kitchen_fittings.png)" 
+                          value={newCatImg}
+                          onChange={(e) => setNewCatImg(e.target.value)}
+                          className="w-full p-3 bg-[#0E0E0F] border border-[#4A4845] text-white text-[10px] focus:border-[#B8723C] outline-none rounded-xl font-mono" 
+                        />
+                      </div>
+                      <label className="p-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl cursor-pointer flex items-center justify-center transition-all">
+                        <UploadCloud className="w-4 h-4" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleImageUpload} 
+                          className="hidden" 
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <button 
+                      type="submit" 
+                      className="w-full py-3 bg-[#B8723C] hover:bg-[#D98E4A] text-black font-display font-black text-xs sm:text-sm uppercase tracking-wider transition-all rounded-xl shadow-lg flex items-center justify-center gap-2"
+                    >
+                      {editingCategory ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />} 
+                      {editingCategory ? 'Save Category Changes' : 'Create Category'}
+                    </button>
+                    {editingCategory && (
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setEditingCategory(null);
+                          setNewCatName('');
+                          setNewCatShortName('');
+                          setNewCatEmoji('⚙️');
+                          setNewCatImg('');
+                          setNewCatDesc('');
+                          setNewCatStamp('');
+                        }}
+                        className="w-full py-2 bg-slate-850 hover:bg-slate-800 text-slate-400 font-mono text-xs uppercase tracking-widest transition-all rounded-xl"
+                      >
+                        Cancel Edit
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
 
@@ -722,7 +834,14 @@ export default function AdminPortal() {
                             <td className="p-3 sm:p-4 font-bold text-white max-w-[100px] sm:max-w-none truncate">{cat.name}</td>
                             <td className="p-3 sm:p-4 text-slate-400 font-mono hidden sm:table-cell">{cat.shortName}</td>
                             <td className="p-3 sm:p-4 font-mono font-bold text-[#D98E4A]">{modelCount}</td>
-                            <td className="p-3 sm:p-4 text-right">
+                            <td className="p-3 sm:p-4 text-right flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleCategoryEdit(cat)}
+                                className="p-1.5 sm:p-2 bg-slate-850 hover:bg-[#B8723C] text-slate-350 hover:text-black rounded-lg transition-all"
+                                title="Edit Category"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
                               <button
                                 onClick={() => handleDeleteCategory(cat.id)}
                                 className="p-1.5 sm:p-2 bg-slate-850 hover:bg-red-600 text-slate-350 hover:text-white rounded-lg transition-all"
